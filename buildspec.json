@@ -33,16 +33,16 @@
     },
     "platformConfig": {
         "macos": {
-            "bundleId": "com.example.obs-plugintemplate"
+            "bundleId": "com.github.kaito-tokyo.obs-chattalker"
         }
     },
-    "name": "obs-plugintemplate",
-    "displayName": "OBS Plugin Template",
+    "name": "obs-chattalker",
+    "displayName": "OBS ChatTalker",
     "version": "1.0.0",
-    "author": "Your Name Here",
-    "website": "https://example.com",
-    "email": "me@example.com",
+    "author": "Kaito Udagawa",
+    "website": "https://github.com/kaito-tokyo/obs-chattalker",
+    "email": "umireon@gmail.com",
     "uuids": {
-        "windowsApp": "00000000-0000-0000-0000-000000000000"
+        "windowsApp": "48e02ceb-03f9-4234-9d68-9ce3cd758d2e"
     }
 }

@@ -57,5 +57,7 @@ if (( ${#install_list} )) {
   sudo apt-get ${apt_args} install ${install_list}
 }
 
+vcpkg install
+
 rehash
 log_group
