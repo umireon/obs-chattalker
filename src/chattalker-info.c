@@ -2,7 +2,7 @@
 
 struct obs_source_info chattalker_info = {
 	.id = "chattalker",
-	.type = OBS_SOURCE_TYPE_FILTER,
+	.type = OBS_SOURCE_AUDIO,
 	.output_flags = OBS_SOURCE_AUDIO,
 	.get_name = chattalker_get_name,
 	.create = chattalker_create,

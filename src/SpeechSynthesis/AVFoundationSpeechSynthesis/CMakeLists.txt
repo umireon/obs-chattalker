@@ -1,1 +1,1 @@
-add_library(AVFoundationSpeechSynthesis AVFoundationSpeechSynthesis.mm AVFoundationSpeechSynthesisEngine.mm)
+add_library(AVFoundationSpeechSynthesis SpeechSynthesis.mm SpeechSynthesisEngine.mm)
