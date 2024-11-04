@@ -44,9 +44,10 @@ elseif(OS_WINDOWS)
   set(TRIPLET x64-windows-static)
 endif()
 
-# find_package(CURL REQUIRED)
-
-# find_package(Curlpp REQUIRED)
+if(APPLE)
+  add_subdirectory(src/SpeechSynthesis/AVFoundationSpeechSynthesis)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE AVFoundationSpeechSynthesis)
+endif()
 
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/ChatTalkerContext.cpp src/chattalker.cpp src/chattalker-info.c
                                              src/plugin-main.c)
