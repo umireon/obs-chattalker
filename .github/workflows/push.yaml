@@ -5,13 +5,13 @@ on:
     branches:
       - master
       - main
-      - 'release/**'
+      - "release/**"
     tags:
-      - '*'
+      - "*"
 permissions:
   contents: write
 concurrency:
-  group: '${{ github.workflow }} @ ${{ github.ref }}'
+  group: "${{ github.workflow }} @ ${{ github.ref }}"
   cancel-in-progress: ${{ github.ref_type == 'tag' }}
 jobs:
   check-format:

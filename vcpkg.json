@@ -1,6 +1,3 @@
 {
-  "dependencies": [
-    "curl",
-    "curlpp"
-  ]
+	"dependencies": ["curl", "curlpp"]
 }

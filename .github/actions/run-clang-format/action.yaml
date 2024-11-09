@@ -4,7 +4,7 @@ inputs:
   failCondition:
     description: Controls whether failed checks also fail the workflow run
     required: false
-    default: 'never'
+    default: "never"
   workingDirectory:
     description: Working directory for checks
     required: false
