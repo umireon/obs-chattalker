@@ -49,7 +49,15 @@ if(APPLE)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE AVFoundationSpeechSynthesis)
 endif()
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/ChatTalkerContext.cpp src/chattalker.cpp src/chattalker-info.c
-                                             src/plugin-main.c)
+target_sources(
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE src/SpeechSynthesis/SpeechSynthesis.hpp
+          src/SpeechSynthesis/SpeechSynthesisEngine.hpp
+          src/chattalker-info.c
+          src/chattalker.cpp
+          src/chattalker.h
+          src/ChatTalkerContext.hpp
+          src/ChatTalkerContext.cpp
+          src/plugin-main.c)
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})

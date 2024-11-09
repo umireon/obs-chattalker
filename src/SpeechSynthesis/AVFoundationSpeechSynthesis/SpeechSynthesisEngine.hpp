@@ -1,13 +1,8 @@
 #pragma once
 
-#import <AVFoundation/AVFoundation.h>
-
 #include "SpeechSynthesis.hpp"
 
-class SpeechSynthesis {
+class SpeechSynthesisEngine {
 public:
-    SpeechSynthesis(void);
-    void synthesize(void);
-private:
-    AVSpeechSynthesizer *__nonnull synthesizer;
+	SpeechSynthesisEngine(void);
 };

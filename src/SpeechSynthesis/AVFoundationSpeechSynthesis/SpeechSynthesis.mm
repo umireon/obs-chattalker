@@ -1,1 +1,5 @@
-#import <AVFoundation/AVFoundation.h>
+#include "SpeechSynthesis.hpp"
+
+SpeechSynthesis::SpeechSynthesis(void) {}
+
+void SpeechSynthesis::synthesize(void) {}
