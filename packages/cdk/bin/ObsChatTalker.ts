@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
-import { ObsChatTalkerStack } from "../lib/ObsChatTalkerStack.js";
+import { MainStack } from "../lib/MainStack.js";
 
 const app = new cdk.App();
 
-new ObsChatTalkerStack(app, "CdkStack", {
+new MainStack(app, "MainStack", {
 	env: {
 		account: "586794439382",
 		region: "us-east-1"
