@@ -4,19 +4,24 @@
 # Except for default project files
 !/.github
 !/build-aux
-!/cloudformation
 !/cmake
 !/data
+!/packages
 !/src
 !/triplets
 !.clang-format
 !.cmake-format.json
 !.gitignore
+!.prettierignore
+!.prettierrc
 !buildspec.json
 !CMakeLists.txt
 !CMakePresets.json
 !LICENSE
+!package-lock.json
+!package.json
 !README.md
+!tsconfig.json
 !vcpkg-configuration.json
 !vcpkg.json
 

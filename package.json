@@ -1,0 +1,15 @@
+{
+	"name": "obs-chattalker",
+	"private": true,
+	"version": "0.1.0",
+	"description": "OBS plugin to speak out the chat message",
+	"author": "Kaito Udagawa",
+	"license": "MIT",
+	"type": "module",
+	"devDependencies": {
+		"prettier": "^3.3.3"
+	},
+	"workspaces": [
+		"packages/cdk"
+	]
+}
