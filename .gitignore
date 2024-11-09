@@ -4,6 +4,7 @@
 # Except for default project files
 !/.github
 !/build-aux
+!/cloudformation
 !/cmake
 !/data
 !/src
