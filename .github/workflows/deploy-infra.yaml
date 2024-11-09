@@ -31,7 +31,7 @@ jobs:
         uses: "actions/checkout@v4"
 
       - name: "Install dependencies"
-        run: "npm ci --workspace=obs-chattalker-cdk"
+        run: "npm ci --workspace=obs-chattalker-cdk && mkdir -p /tmp/opt && ls -l /tmp"
 
       - name: "Deploy service CodeBuild projects"
         working-directory: "packages/cdk"
