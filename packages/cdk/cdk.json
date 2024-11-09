@@ -1,5 +1,5 @@
 {
-	"app": "tsx bin/ObsChatTalker.ts",
+	"app": "node_modules/.bin/tsx bin/ObsChatTalker.ts",
 	"watch": {
 		"include": ["**"],
 		"exclude": [
