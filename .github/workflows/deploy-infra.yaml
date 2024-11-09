@@ -1,0 +1,34 @@
+---
+name: "deploy-infra"
+
+on:
+  push:
+    branches:
+      - "main"
+
+defaults:
+  run:
+    shell: "bash"
+
+jobs:
+  DeployInfra:
+    runs-on:
+      - "codebuild-ObsChatTalkerDeployInfraDev001-${{ github.run_id }}-${{ github.run_attempt }}"
+      - "image:arm-lambda-nodejs20"
+      - "instance-size:1GB"
+    
+    environment: "dev"
+
+    concurrency:
+      group: "dev"
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: "Deploy CloudFormation Stack"
+        run: |
+          aws cloudformation deploy \
+            --template-file cloudformation/template.yaml \
+            --stack-name ObsChatTalkerInfra \
+            --role-arn "arn:aws:iam::586794439382:role/GitHubActionsSelfHosted/CloudFormationDeployer"
