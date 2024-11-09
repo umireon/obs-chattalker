@@ -27,6 +27,9 @@ jobs:
       npm_config_tmp: "${{ github.workspace}}/.tmp"
 
     steps:
+      - name: "Fix npx"
+        run: "mkdir -p /tmp/opt/npm"
+
       - name: "Checkout"
         uses: "actions/checkout@v4"
 
