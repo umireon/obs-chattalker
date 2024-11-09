@@ -26,9 +26,9 @@ jobs:
       - name: "Checkout"
         uses: "actions/checkout@v4"
 
-      - name: "Deploy CloudFormation Stack"
-        run: |
-          aws cloudformation deploy \
-            --template-file cloudformation/template.yaml \
-            --stack-name ObsChatTalkerInfra \
-            --role-arn "arn:aws:iam::586794439382:role/GitHubActionsSelfHosted/CloudFormationDeployer"
+      - name: "Install dependencies"
+        run: "npm ci --workspace=obs-chattalker-cdk"
+
+      - name: "Deploy service CodeBuild projects"
+        working-directory: "packages/cdk"
+        run: "./update.sh"
