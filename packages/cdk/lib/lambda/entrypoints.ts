@@ -78,7 +78,7 @@ export async function handleTwitchOauthCallback(
 		client_secret: twitchClientSecret,
 		code: requestCode,
 		grant_type: "authorization_code",
-		redirect_uri: `https://${process.env["HOST"]}${event.rawPath}?${event.rawQueryString}`
+		redirect_uri: `https://${process.env["HOST"]}/twitch/oauth/callback`
 	});
 
 	const response = await fetch("https://id.twitch.tv/oauth2/token", {
