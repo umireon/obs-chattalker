@@ -62,6 +62,7 @@ target_sources(
           src/chattalker.h
           src/ChatTalkerContext.hpp
           src/ChatTalkerContext.cpp
-          src/plugin-main.c)
+          src/plugin-main.c
+          src/TwitchOauthClient.hpp)
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
