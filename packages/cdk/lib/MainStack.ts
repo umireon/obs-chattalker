@@ -78,7 +78,8 @@ export class MainStack extends cdk.Stack {
 				entry: "lib/lambda/entrypoints.ts",
 				handler: "handleTwitchOauthCallback",
 				environment: {
-					TWITCH_SECRET_NAME: twitchClientSecret.secretName
+					TWITCH_SECRET_NAME: twitchClientSecret.secretName,
+					HOST: props.zoneName
 				}
 			}
 		);

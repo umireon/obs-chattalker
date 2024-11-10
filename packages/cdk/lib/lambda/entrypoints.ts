@@ -49,7 +49,7 @@ export async function handleTwitchOauthCallback(
 		return BadRequest;
 	}
 
-	if (!process.env["TWITCH_SECRET_NAME"]) {
+	if (!process.env["TWITCH_SECRET_NAME"] || !process.env["HOST"]) {
 		logger.error("No Twitch secret ARN");
 		return InternalServerError;
 	}
@@ -116,7 +116,7 @@ export async function handleTwitchOauthCallback(
 		access_token,
 		expires_in: expires_in.toString(),
 		refresh_token,
-		redirect_uri: `http://appdev.obs-chattalker.kaito.tokyo/oauth/callback`
+		redirect_uri: `https//${process.env["HOST"]}${event.rawPath}?${event.rawQueryString}`
 	});
 
 	return {
