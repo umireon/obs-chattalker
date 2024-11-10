@@ -16,7 +16,7 @@ defaults:
 jobs:
   DeployInfra:
     runs-on:
-      - "codebuild-ObsChatTalkerDeployInfraDev001-${{ github.run_id }}-${{ github.run_attempt }}"
+      - "codebuild-ObsChatTalkerInfraDeployerDev001-${{ github.run_id }}-${{ github.run_attempt }}"
       - "image:arm-lambda-nodejs20"
       - "instance-size:1GB"
 
