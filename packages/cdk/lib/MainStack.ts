@@ -117,7 +117,7 @@ export class MainStack extends cdk.Stack {
 			domainNames: [obsDomainName],
 			errorResponses: [
 				{
-					httpStatus: 404,
+					httpStatus: 403,
 					responsePagePath: "/404.html"
 				}
 			]
