@@ -1,3 +1,10 @@
 {
-	"dependencies": ["curl", "curlpp", "cpp-httplib"]
+  "dependencies": [
+    "curl",
+    "curlpp",
+    {
+      "name": "cpp-httplib",
+      "default-features": false
+    }
+  ]
 }
