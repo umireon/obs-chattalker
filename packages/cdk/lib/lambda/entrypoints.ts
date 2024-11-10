@@ -86,7 +86,9 @@ export async function handleTwitchOauthCallback(
 	});
 
 	if (!response.ok) {
-		logger.error("Failed to get Twitch OAuth token");
+		logger.error("Failed to get Twitch OAuth token!");
+		const text = await response.text();
+		logger.error(text);
 		return InternalServerError;
 	}
 
