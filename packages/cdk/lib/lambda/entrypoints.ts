@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 
 import { getSecret } from "@aws-lambda-powertools/parameters/secrets";
+import { Logger } from "@aws-lambda-powertools/logger";
 
 interface TwitchClientInfo {
 	twitchClientId: string;
@@ -25,10 +26,15 @@ const InternalServerError = {
 	body: "Bad Request!"
 } as const satisfies APIGatewayProxyResultV2;
 
+const logger = new Logger({
+	serviceName: "ObsChatTalker"
+});
+
 export async function handleTwitchOauthCallback(
 	event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyResultV2> {
 	if (!event.queryStringParameters) {
+		logger.error("No query string parameters");
 		return InternalServerError;
 	}
 
@@ -39,27 +45,31 @@ export async function handleTwitchOauthCallback(
 	} = event.queryStringParameters;
 
 	if (!requestCode || !requestState || !requestScope) {
+		logger.warn("Missing query string parameters");
 		return BadRequest;
 	}
 
-	if (!process.env["TWITCH_SECRET_ARN"]) {
+	if (!process.env["TWITCH_SECRET_NAME"]) {
+		logger.error("No Twitch secret ARN");
 		return InternalServerError;
 	}
 
 	const twitchClientInfo: Partial<TwitchClientInfo> | undefined = await getSecret(
-		process.env["TWITCH_SECRET_ARN"],
+		process.env["TWITCH_SECRET_NAME"],
 		{
 			transform: "json"
 		}
 	);
 
 	if (!twitchClientInfo) {
+		logger.error("Failed to get Twitch client info");
 		return InternalServerError;
 	}
 
 	const { twitchClientId, twitchClientSecret } = twitchClientInfo;
 
 	if (!twitchClientId || !twitchClientSecret) {
+		logger.error("Missing Twitch client info");
 		return InternalServerError;
 	}
 
@@ -76,6 +86,7 @@ export async function handleTwitchOauthCallback(
 	});
 
 	if (!response.ok) {
+		logger.error("Failed to get Twitch OAuth token");
 		return InternalServerError;
 	}
 
@@ -93,6 +104,7 @@ export async function handleTwitchOauthCallback(
 			typeof json.refresh_token === "string"
 		)
 	) {
+		logger.error("Invalid Twitch OAuth token response");
 		return InternalServerError;
 	}
 

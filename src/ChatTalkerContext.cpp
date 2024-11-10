@@ -50,7 +50,7 @@ obs_properties_t *ChatTalkerContext::getProperties(void)
 
 #define TWITCH_CLIENT_ID "ijpjboz3v6rbxbalzqvtln0puk2md8"
 #define TWITCH_REDIRECT_URI \
-	"https://apidev.obs-chattalker.kaito.tokyo/oauth/callback"
+	"https://apidev.obs-chattalker.kaito.tokyo/twitch/oauth/callback"
 #define TWITCH_SCOPE "chat:read"
 
 bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
