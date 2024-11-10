@@ -24,7 +24,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - name: "Fix npx"
+      - name: "Fix npm"
         run: "mkdir -p /tmp/opt/npm/lib"
 
       - name: "Checkout"
@@ -33,6 +33,6 @@ jobs:
       - name: "Install dependencies"
         run: "npm ci --workspace=obs-chattalker-cdk"
 
-      - name: "Deploy service CodeBuild projects"
+      - name: "Deploy infra"
         working-directory: "packages/cdk"
         run: "./update.sh"
