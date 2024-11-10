@@ -23,7 +23,7 @@ ChatTalkerContext::ChatTalkerContext(obs_data_t *settings,
 ChatTalkerContext::~ChatTalkerContext(void)
 {
 	isDestroying.store(true);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
 }
 
 bool handle_auth_twitch_clicked(obs_properties_t *props,
@@ -59,10 +59,16 @@ bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
 	UNUSED_PARAMETER(props);
 	UNUSED_PARAMETER(property);
 
+	if (authCodeReceiverThread.joinable()) {
+		isDestroying.store(true);
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	}
+
 	authCodeReceiverCleanupThread = std::thread([this]() {
 		for (long timeout = 6000; timeout > 0 && !isDestroying.load();
 		     timeout -= 1) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			std::this_thread::sleep_for(
+				std::chrono::milliseconds(100));
 		}
 
 		if (authCodeReceivingServer.is_running()) {
@@ -73,30 +79,31 @@ bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
 			authCodeReceiverThread.join();
 		}
 	});
-    
-    int port = 0;
+
+	int port = 0;
 
 	authCodeReceivingServer.Get("/", [&port](const httplib::Request &req,
-					    httplib::Response &res) {
-        std::string code;
+						 httplib::Response &res) {
+		std::string code;
 
-        for (auto entry : req.params) {
-            if (entry.first == "code") {
-                code = entry.second;
-            }
+		for (auto entry : req.params) {
+			if (entry.first == "code") {
+				code = entry.second;
+			}
 		}
 
-        if (code.empty()) {
-            res.status = httplib::BadRequest_400;
-            res.set_content(httplib::status_message(res.status), "text/plain");
-            obs_log(LOG_WARNING, "Authorization code is invalid!");
-        } else {
-            res.status = httplib::NoContent_204;
-            obs_log(LOG_WARNING, "Authorization code is received");
-        }
+		if (code.empty()) {
+			res.status = httplib::BadRequest_400;
+			res.set_content(httplib::status_message(res.status),
+					"text/plain");
+			obs_log(LOG_WARNING, "Authorization code is invalid!");
+		} else {
+			res.status = httplib::NoContent_204;
+			obs_log(LOG_WARNING, "Authorization code is received");
+		}
 	});
 
-    port = authCodeReceivingServer.bind_to_any_port("localhost");
+	port = authCodeReceivingServer.bind_to_any_port("localhost");
 	obs_log(LOG_INFO, "port: %d", port);
 
 	authCodeReceiverThread = std::thread(
