@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: "Fix npx"
-        run: "mkdir -p /tmp/opt/npm"
+        run: "mkdir -p /tmp/opt/npm/lib"
 
       - name: "Checkout"
         uses: "actions/checkout@v4"
