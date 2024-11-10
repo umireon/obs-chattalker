@@ -13,5 +13,6 @@ public:
 	obs_source_frame *filterVideo(obs_source_frame *frame);
 	obs_audio_data *filterAudio(obs_audio_data *audio);
 
-    bool handleAuthTwitchClicked(obs_properties_t *props, obs_property_t *property);
+	bool handleAuthTwitchClicked(obs_properties_t *props,
+				     obs_property_t *property);
 };

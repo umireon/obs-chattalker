@@ -6,10 +6,11 @@
 
 class SpeechSynthesis {
 public:
-    SpeechSynthesis(AVSpeechSynthesizer * __nonnull _synthesizer, const std::string &text);
+	SpeechSynthesis(AVSpeechSynthesizer *__nonnull _synthesizer,
+			const std::string &text);
 	void synthesize(void);
-    
+
 private:
-    AVSpeechSynthesizer * __nonnull synthesizer;
-    AVSpeechUtterance * __nonnull utterance;
+	AVSpeechSynthesizer *__nonnull synthesizer;
+	AVSpeechUtterance *__nonnull utterance;
 };

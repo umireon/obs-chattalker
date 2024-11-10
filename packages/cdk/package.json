@@ -2,6 +2,7 @@
 	"name": "obs-chattalker-cdk",
 	"version": "0.1.0",
 	"devDependencies": {
+		"@types/aws-lambda": "^8.10.145",
 		"@types/node": "20.6.0",
 		"aws-cdk": "2.166.0",
 		"tsx": "^4.19.2",
