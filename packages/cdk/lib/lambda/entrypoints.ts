@@ -116,7 +116,7 @@ export async function handleTwitchOauthCallback(
 		access_token,
 		expires_in: expires_in.toString(),
 		refresh_token,
-		redirect_uri: `https//${process.env["HOST"]}${event.rawPath}?${event.rawQueryString}`
+		redirect_uri: `https://${process.env["HOST"]}${event.rawPath}?${event.rawQueryString}`
 	});
 
 	return {
