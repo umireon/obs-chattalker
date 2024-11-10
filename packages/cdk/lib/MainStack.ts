@@ -24,28 +24,9 @@ export class MainStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props: MainStackProps) {
 		super(scope, id, props);
 
-		const zone = new route53.PublicHostedZone(this, "ApiZone", {
+		// Hosted zone
+		const apiZone = new route53.PublicHostedZone(this, "ApiZone", {
 			zoneName: props.zoneName
-		});
-
-		const certificate = new acm.Certificate(this, "ApiCertificate", {
-			domainName: props.zoneName,
-			validation: acm.CertificateValidation.fromDns(zone)
-		});
-
-		const httpApiDomainName = new apigwv2.DomainName(this, "ObsChatTalkerApiDoaminName", {
-			domainName: props.zoneName,
-			certificate
-		});
-
-		new route53.ARecord(this, "ApiZoneAlias", {
-			zone,
-			target: route53.RecordTarget.fromAlias(
-				new targets.ApiGatewayv2DomainProperties(
-					httpApiDomainName.regionalDomainName,
-					httpApiDomainName.regionalHostedZoneId
-				)
-			)
 		});
 
 		const delegationRoleArn = this.formatArn({
@@ -55,6 +36,7 @@ export class MainStack extends cdk.Stack {
 			resource: "role",
 			resourceName: `route53-delegation/apidev-${this.account}`
 		});
+
 		const delegationRole = iam.Role.fromRoleArn(
 			this,
 			"ApidevZoneDelegationRole",
@@ -62,56 +44,73 @@ export class MainStack extends cdk.Stack {
 		);
 
 		new route53.CrossAccountZoneDelegationRecord(this, "ApiDevZoneDelegate", {
-			delegatedZone: zone,
+			delegatedZone: apiZone,
 			parentHostedZoneName: "obs-chattalker.kaito.tokyo",
 			delegationRole
 		});
 
-		const twitchClientSecret = new secretsmanager.Secret(this, "Twitch", {
-			secretObjectValue: {
-				twitchClientId: cdk.SecretValue.unsafePlainText("ijpjboz3v6rbxbalzqvtln0puk2md8"),
-				twitchClientSecret: cdk.SecretValue.unsafePlainText("")
-			}
+		// API Gateway
+		const apiCertificate = new acm.Certificate(this, "ApiCertificate", {
+			domainName: props.zoneName,
+			validation: acm.CertificateValidation.fromDns(apiZone)
 		});
 
-		const twitchOauthCallbackFunction = new nodejs.NodejsFunction(
-			this,
-			"TwitchOauthCallbackFunction",
-			{
-				entry: "lib/lambda/entrypoints.ts",
-				handler: "handleTwitchOauthCallback",
-				environment: {
-					TWITCH_SECRET_NAME: twitchClientSecret.secretName,
-					HOST: props.zoneName
-				}
-			}
-		);
-		twitchClientSecret.grantRead(twitchOauthCallbackFunction);
+		const httpApiDomainName = new apigwv2.DomainName(this, "ApiDoaminName", {
+			domainName: props.zoneName,
+			certificate: apiCertificate
+		});
 
-		const httpApi = new apigwv2.HttpApi(this, "ObsChatTalkerApi", {
+		new route53.ARecord(this, "ApiZoneAlias", {
+			zone: apiZone,
+			target: route53.RecordTarget.fromAlias(
+				new targets.ApiGatewayv2DomainProperties(
+					httpApiDomainName.regionalDomainName,
+					httpApiDomainName.regionalHostedZoneId
+				)
+			)
+		});
+
+		const httpApi = new apigwv2.HttpApi(this, "httpApi", {
 			defaultDomainMapping: {
 				domainName: httpApiDomainName
 			}
 		});
 
-		httpApi.addRoutes({
-			path: "/twitch/oauth/callback",
-			methods: [apigwv2.HttpMethod.GET],
-			integration: new HttpLambdaIntegration("TwitchOauthCallback", twitchOauthCallbackFunction)
-		});
-
+		// OBS authorization finished screen
 		const obsDomainName = `obs.${props.zoneName}`;
 
 		const obsBucket = new s3.Bucket(this, "ObsBucket");
 
+		new s3deploy.BucketDeployment(this, "ObsBucketDeployment", {
+			sources: [s3deploy.Source.asset("./assets/ObsBucket")],
+			destinationBucket: obsBucket
+		});
+
 		const obsCertificate = new acm.Certificate(this, "ObsCertificate", {
 			domainName: obsDomainName,
-			validation: acm.CertificateValidation.fromDns(zone)
+			validation: acm.CertificateValidation.fromDns(apiZone)
 		});
+
+		const recursiveDefaultRootFunction = new cloudfront.Function(
+			this,
+			"RecursiveDefaultRootFunction",
+			{
+				code: cloudfront.FunctionCode.fromFile({
+					filePath: "cloudfront/RecursiveDefaultRoot.js"
+				}),
+				runtime: cloudfront.FunctionRuntime.JS_2_0
+			}
+		);
 
 		const obsDistribution = new cloudfront.Distribution(this, "ObsDistribution", {
 			defaultBehavior: {
-				origin: origins.S3BucketOrigin.withOriginAccessControl(obsBucket)
+				origin: origins.S3BucketOrigin.withOriginAccessControl(obsBucket),
+				functionAssociations: [
+					{
+						function: recursiveDefaultRootFunction,
+						eventType: cloudfront.FunctionEventType.VIEWER_REQUEST
+					}
+				]
 			},
 			certificate: obsCertificate,
 			domainNames: [obsDomainName],
@@ -124,14 +123,38 @@ export class MainStack extends cdk.Stack {
 		});
 
 		new route53.ARecord(this, "ObsZoneAlias", {
-			zone,
+			zone: apiZone,
 			recordName: "obs",
 			target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(obsDistribution))
 		});
 
-		new s3deploy.BucketDeployment(this, "ObsBucketDeployment", {
-			sources: [s3deploy.Source.asset("./assets")],
-			destinationBucket: obsBucket
+		// Twitch OAuth callback function
+		const twitchClientSecret = new secretsmanager.Secret(this, "TwitchOauthSecret", {
+			secretObjectValue: {
+				twitchClientId: cdk.SecretValue.unsafePlainText("ijpjboz3v6rbxbalzqvtln0puk2md8"),
+				twitchClientSecret: cdk.SecretValue.unsafePlainText("")
+			}
+		});
+
+		const twitchOauthCallbackFunction = new nodejs.NodejsFunction(
+			this,
+			"TwitchOauthCallbackFunction",
+			{
+				entry: "lambda/entry.ts",
+				handler: "handleTwitchOauthCallback",
+				environment: {
+					TWITCH_SECRET_NAME: twitchClientSecret.secretName,
+					HOST: props.zoneName
+				}
+			}
+		);
+
+		twitchClientSecret.grantRead(twitchOauthCallbackFunction);
+
+		httpApi.addRoutes({
+			path: "/twitch/oauth/callback",
+			methods: [apigwv2.HttpMethod.GET],
+			integration: new HttpLambdaIntegration("TwitchOauthCallback", twitchOauthCallbackFunction)
 		});
 	}
 }
