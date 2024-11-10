@@ -22,11 +22,11 @@ ChatTalkerContext::ChatTalkerContext(obs_data_t *settings,
 
 ChatTalkerContext::~ChatTalkerContext(void)
 {
-    authCodeReceiverDestroying.store(true);
+	authCodeReceiverDestroying.store(true);
 	std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    if (authCodeReceiverCleanupThread.joinable()) {
-        authCodeReceiverCleanupThread.join();
-    }
+	if (authCodeReceiverCleanupThread.joinable()) {
+		authCodeReceiverCleanupThread.join();
+	}
 }
 
 bool handle_auth_twitch_clicked(obs_properties_t *props,
@@ -55,6 +55,8 @@ obs_properties_t *ChatTalkerContext::getProperties(void)
 #define TWITCH_REDIRECT_URI \
 	"https://apidev.obs-chattalker.kaito.tokyo/twitch/oauth/callback"
 #define TWITCH_SCOPE "chat:read"
+#define TWITCH_FINISHED_URI \
+	"https://apidev.obs-chattalker.kaito.tokyo/twitch/oauth/finished"
 
 bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
 						obs_property_t *property)
@@ -63,17 +65,17 @@ bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
 	UNUSED_PARAMETER(property);
 
 	if (authCodeReceiverThread.joinable()) {
-        authCodeReceiverDestroying.store(true);
+		authCodeReceiverDestroying.store(true);
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        authCodeReceiverCleanupThread.join();
+		authCodeReceiverCleanupThread.join();
 	}
 
 	authCodeReceiverCleanupThread = std::thread([this]() {
-		for (long timeout = 6000; timeout > 0 && !authCodeReceiverDestroying.load();
+		for (long timeout = 6000;
+		     timeout > 0 && !authCodeReceiverDestroying.load();
 		     timeout -= 1) {
 			std::this_thread::sleep_for(
 				std::chrono::milliseconds(100));
-            obs_log(LOG_INFO, "aaa");
 		}
 
 		if (authCodeReceiverServer.is_running()) {
@@ -83,30 +85,37 @@ bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
 		if (authCodeReceiverThread.joinable()) {
 			authCodeReceiverThread.join();
 		}
-        
-        authCodeReceiverDestroying.store(false);
+
+		authCodeReceiverDestroying.store(false);
 	});
 
 	int port = 0;
 
 	authCodeReceiverServer.Get("/", [&port](const httplib::Request &req,
-						 httplib::Response &res) {
-		std::string code;
+						httplib::Response &res) {
+		std::string accessToken;
+		std::string expiresIn;
+		std::string refreshToken;
 
 		for (auto entry : req.params) {
-			if (entry.first == "code") {
-				code = entry.second;
+			if (entry.first == "access_token") {
+				accessToken = entry.second;
+			} else if (entry.first == "expires_in") {
+				expiresIn = entry.second;
+			} else if (entry.first == "refresh_token") {
+				refreshToken = entry.second;
 			}
 		}
 
-		if (code.empty()) {
+		if (accessToken.empty() && expiresIn.empty() &&
+		    refreshToken.empty()) {
 			res.status = httplib::BadRequest_400;
 			res.set_content(httplib::status_message(res.status),
 					"text/plain");
 			obs_log(LOG_WARNING, "Authorization code is invalid!");
 		} else {
-			res.status = httplib::NoContent_204;
 			obs_log(LOG_WARNING, "Authorization code is received");
+			res.set_redirect(TWITCH_FINISHED_URI);
 		}
 	});
 
