@@ -22,11 +22,11 @@ export class MainStack extends cdk.Stack {
 			service: "iam",
 			account: "913524900670",
 			resource: "role",
-			resourceName: "MyDelegationRole"
+			resourceName: `route53-delegation/apidev-${this.account}`
 		});
 		const delegationRole = iam.Role.fromRoleArn(
 			this,
-			"ApiDevZoneDelegationRole",
+			"ApidevZoneDelegationRole",
 			delegationRoleArn
 		);
 
