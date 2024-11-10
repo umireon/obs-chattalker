@@ -107,8 +107,8 @@ bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
 			}
 		}
 
-		if (!accessToken.empty() || !expiresIn.empty() ||
-		    !refreshToken.empty()) {
+		if (accessToken.empty() || expiresIn.empty() ||
+		    refreshToken.empty()) {
 			res.status = httplib::BadRequest_400;
 			res.set_content(httplib::status_message(res.status),
 					"text/plain");
