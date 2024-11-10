@@ -22,8 +22,11 @@ ChatTalkerContext::ChatTalkerContext(obs_data_t *settings,
 
 ChatTalkerContext::~ChatTalkerContext(void)
 {
-	isDestroying.store(true);
+    authCodeReceiverDestroying.store(true);
 	std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    if (authCodeReceiverCleanupThread.joinable()) {
+        authCodeReceiverCleanupThread.join();
+    }
 }
 
 bool handle_auth_twitch_clicked(obs_properties_t *props,
@@ -60,29 +63,33 @@ bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
 	UNUSED_PARAMETER(property);
 
 	if (authCodeReceiverThread.joinable()) {
-		isDestroying.store(true);
+        authCodeReceiverDestroying.store(true);
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        authCodeReceiverCleanupThread.join();
 	}
 
 	authCodeReceiverCleanupThread = std::thread([this]() {
-		for (long timeout = 6000; timeout > 0 && !isDestroying.load();
+		for (long timeout = 6000; timeout > 0 && !authCodeReceiverDestroying.load();
 		     timeout -= 1) {
 			std::this_thread::sleep_for(
 				std::chrono::milliseconds(100));
+            obs_log(LOG_INFO, "aaa");
 		}
 
-		if (authCodeReceivingServer.is_running()) {
-			authCodeReceivingServer.stop();
+		if (authCodeReceiverServer.is_running()) {
+			authCodeReceiverServer.stop();
 		}
 
 		if (authCodeReceiverThread.joinable()) {
 			authCodeReceiverThread.join();
 		}
+        
+        authCodeReceiverDestroying.store(false);
 	});
 
 	int port = 0;
 
-	authCodeReceivingServer.Get("/", [&port](const httplib::Request &req,
+	authCodeReceiverServer.Get("/", [&port](const httplib::Request &req,
 						 httplib::Response &res) {
 		std::string code;
 
@@ -103,11 +110,11 @@ bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
 		}
 	});
 
-	port = authCodeReceivingServer.bind_to_any_port("localhost");
+	port = authCodeReceiverServer.bind_to_any_port("localhost");
 	obs_log(LOG_INFO, "port: %d", port);
 
 	authCodeReceiverThread = std::thread(
-		[this]() { authCodeReceivingServer.listen_after_bind(); });
+		[this]() { authCodeReceiverServer.listen_after_bind(); });
 
 	std::ostringstream urlBuilder;
 	urlBuilder << "https://id.twitch.tv/oauth2/authorize"

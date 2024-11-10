@@ -22,9 +22,8 @@ public:
 				     obs_property_t *property);
 
 private:
-	httplib::Server authCodeReceivingServer;
+	httplib::Server authCodeReceiverServer;
 	std::thread authCodeReceiverThread;
 	std::thread authCodeReceiverCleanupThread;
-
-	std::atomic_bool isDestroying;
+	std::atomic_bool authCodeReceiverDestroying;
 };
