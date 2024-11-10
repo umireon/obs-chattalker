@@ -82,6 +82,10 @@ runs:
 
         .github/scripts/Build-Windows.ps1 @BuildArgs
 
+    - name: Setup tmate session
+      if: "always()"
+      uses: mxschmitt/action-tmate@v3
+
     - name: Create Summary 📊
       if: contains(fromJSON('["Linux", "macOS"]'),runner.os)
       shell: zsh --no-rcs --errexit --pipefail {0}
