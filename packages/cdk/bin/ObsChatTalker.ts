@@ -5,7 +5,7 @@ import { MainStack } from "../lib/MainStack.js";
 
 const app = new cdk.App();
 
-new MainStack(app, "MainStack", {
+new MainStack(app, "ObsChatTalkerMainStack", {
 	env: {
 		account: "586794439382",
 		region: "us-east-1"
