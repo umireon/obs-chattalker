@@ -29,7 +29,6 @@ export class MainStack extends cdk.Stack {
 
 		const certificate = new acm.Certificate(this, "ApiCertificate", {
 			domainName: props.zoneName,
-			certificateName: props.zoneName,
 			validation: acm.CertificateValidation.fromDns(zone)
 		});
 
@@ -100,12 +99,27 @@ export class MainStack extends cdk.Stack {
 			integration: new HttpLambdaIntegration("TwitchOauthCallback", twitchOauthCallbackFunction)
 		});
 
-		const finishedBucket = new s3.Bucket(this, "ObsChatTalkerOauthFinishedBucket");
+		const obsDomainName = `obs.${props.zoneName}`;
 
-		new cloudfront.Distribution(this, "ObsChatTalkerDistribution", {
+		const obsBucket = new s3.Bucket(this, "ObsBucket");
+
+		const obsCertificate = new acm.Certificate(this, "ObsCertificate", {
+			domainName: obsDomainName,
+			validation: acm.CertificateValidation.fromDns(zone)
+		});
+
+		const obsDistribution = new cloudfront.Distribution(this, "ObsDistribution", {
 			defaultBehavior: {
-				origin: origins.S3BucketOrigin.withOriginAccessControl(finishedBucket)
-			}
+				origin: origins.S3BucketOrigin.withOriginAccessControl(obsBucket)
+			},
+			certificate: obsCertificate,
+			domainNames: [obsDomainName]
+		});
+
+		new route53.ARecord(this, "ObsZoneAlias", {
+			zone,
+			recordName: obsDomainName,
+			target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(obsDistribution))
 		});
 	}
 }
