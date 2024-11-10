@@ -118,7 +118,7 @@ export class MainStack extends cdk.Stack {
 
 		new route53.ARecord(this, "ObsZoneAlias", {
 			zone,
-			recordName: obsDomainName,
+			recordName: "obs",
 			target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(obsDistribution))
 		});
 	}
