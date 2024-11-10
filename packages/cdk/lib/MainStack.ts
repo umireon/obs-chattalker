@@ -71,13 +71,17 @@ export class MainStack extends cdk.Stack {
 			}
 		});
 
-		const twitchOauthCallbackFunction = new nodejs.NodejsFunction(this, "TwitchOauthCallbackFunction", {
-			entry: "lib/lambda/entrypoints.ts",
-			handler: "handleTwitchOauthCallback",
-			environment: {
-				TWITCH_SECRET_ARN: twitchClientSecret.secretArn
+		const twitchOauthCallbackFunction = new nodejs.NodejsFunction(
+			this,
+			"TwitchOauthCallbackFunction",
+			{
+				entry: "lib/lambda/entrypoints.ts",
+				handler: "handleTwitchOauthCallback",
+				environment: {
+					TWITCH_SECRET_NAME: twitchClientSecret.secretName
+				}
 			}
-		});
+		);
 
 		const httpApi = new apigwv2.HttpApi(this, "ObsChatTalkerApi", {
 			defaultDomainMapping: {
