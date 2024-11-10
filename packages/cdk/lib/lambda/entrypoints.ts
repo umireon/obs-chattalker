@@ -115,7 +115,8 @@ export async function handleTwitchOauthCallback(
 	const deviceParams = new URLSearchParams({
 		access_token,
 		expires_in: expires_in.toString(),
-		refresh_token
+		refresh_token,
+		redirect_uri: `http://appdev.obs-chattalker.kaito.tokyo/oauth/callback`
 	});
 
 	return {
