@@ -35,4 +35,4 @@ jobs:
 
       - name: "Deploy service CodeBuild projects"
         working-directory: "packages/cdk"
-        run: "ls && ls node_modules && ./update.sh"
+        run: "./update.sh"
