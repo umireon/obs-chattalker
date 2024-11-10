@@ -11,6 +11,7 @@ import {
 	aws_route53 as route53,
 	aws_route53_targets as targets,
 	aws_s3 as s3,
+	aws_s3_deployment as s3deploy,
 	aws_secretsmanager as secretsmanager
 } from "aws-cdk-lib";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
@@ -121,6 +122,11 @@ export class MainStack extends cdk.Stack {
 			zone,
 			recordName: "obs",
 			target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(obsDistribution))
+		});
+
+		new s3deploy.BucketDeployment(this, "ObsBucketDeployment", {
+			sources: [s3deploy.Source.asset("./assets")],
+			destinationBucket: obsBucket
 		});
 	}
 }
