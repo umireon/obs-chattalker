@@ -5,9 +5,6 @@ on:
   push:
     branches:
       - "main"
-    paths:
-      - "packages/cdk/**"
-      - ".github/workflows/deploy-infra.yaml"
 
 defaults:
   run:
