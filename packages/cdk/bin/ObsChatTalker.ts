@@ -9,7 +9,8 @@ new MainStack(app, "ObsChatTalkerMainStack", {
 	env: {
 		account: "586794439382",
 		region: "us-east-1"
-	}
+	},
+	zoneName: "apidev.obs-chattalker.kaito.tokyo"
 });
 
 app.synth();
