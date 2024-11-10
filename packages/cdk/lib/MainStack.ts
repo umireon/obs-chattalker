@@ -82,6 +82,7 @@ export class MainStack extends cdk.Stack {
 				}
 			}
 		);
+		twitchClientSecret.grantRead(twitchOauthCallbackFunction);
 
 		const httpApi = new apigwv2.HttpApi(this, "ObsChatTalkerApi", {
 			defaultDomainMapping: {
