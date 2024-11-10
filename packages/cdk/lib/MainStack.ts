@@ -4,10 +4,13 @@ import { Construct } from "constructs";
 import {
 	aws_apigatewayv2 as apigwv2,
 	aws_certificatemanager as acm,
+	aws_cloudfront as cloudfront,
+	aws_cloudfront_origins as origins,
 	aws_iam as iam,
 	aws_lambda_nodejs as nodejs,
 	aws_route53 as route53,
 	aws_route53_targets as targets,
+	aws_s3 as s3,
 	aws_secretsmanager as secretsmanager
 } from "aws-cdk-lib";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
@@ -95,6 +98,14 @@ export class MainStack extends cdk.Stack {
 			path: "/twitch/oauth/callback",
 			methods: [apigwv2.HttpMethod.GET],
 			integration: new HttpLambdaIntegration("TwitchOauthCallback", twitchOauthCallbackFunction)
+		});
+
+		const finishedBucket = new s3.Bucket(this, "ObsChatTalkerOauthFinishedBucket");
+
+		new cloudfront.Distribution(this, "ObsChatTalkerDistribution", {
+			defaultBehavior: {
+				origin: origins.S3BucketOrigin.withOriginAccessControl(finishedBucket)
+			}
 		});
 	}
 }
