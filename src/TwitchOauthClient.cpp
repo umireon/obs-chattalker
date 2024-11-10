@@ -8,9 +8,8 @@
 #include <obs.h>
 #include "plugin-support.h"
 
-#define TWITCH_BASEURI "https://apidev.obs-chattalker.kaito.tokyo"
-#define TWITCH_CALLBACK_URI TWITCH_BASEURI "/twitch/oauth/callback"
-#define TWITCH_FINISHED_URI TWITCH_BASEURI "/twitch/oauth/finished"
+#define TWITCH_CALLBACK_URI "https://apidev.obs-chattalker.kaito.tokyo/twitch/oauth/callback"
+#define TWITCH_FINISHED_URI "https://obs.apidev.obs-chattalker.kaito.tokyo/twitch/oauth/finished"
 
 #define TWITCH_CLIENT_ID "ijpjboz3v6rbxbalzqvtln0puk2md8"
 #define TWITCH_SCOPE "chat:read"
