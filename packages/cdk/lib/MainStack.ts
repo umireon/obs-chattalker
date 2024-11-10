@@ -19,19 +19,6 @@ export class MainStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props: MainStackProps) {
 		super(scope, id, props);
 
-		const oauthCallbackFunction = new nodejs.NodejsFunction(this, "OauthCallbackFunction", {
-			entry: "lib/lambda/entrypoints.ts",
-			handler: "handleOauthCallback"
-		});
-
-		const httpApi = new apigwv2.HttpApi(this, "ObsChatTalkerApi");
-
-		httpApi.addRoutes({
-			path: "/oauth/callback",
-			methods: [apigwv2.HttpMethod.GET],
-			integration: new HttpLambdaIntegration("OauthCallback", oauthCallbackFunction)
-		});
-
 		const zone = new route53.PublicHostedZone(this, "ApiZone", {
 			zoneName: props.zoneName
 		});
@@ -74,6 +61,23 @@ export class MainStack extends cdk.Stack {
 			delegatedZone: zone,
 			parentHostedZoneName: "obs-chattalker.kaito.tokyo",
 			delegationRole
+		});
+
+		const oauthCallbackFunction = new nodejs.NodejsFunction(this, "OauthCallbackFunction", {
+			entry: "lib/lambda/entrypoints.ts",
+			handler: "handleOauthCallback"
+		});
+
+		const httpApi = new apigwv2.HttpApi(this, "ObsChatTalkerApi", {
+			defaultDomainMapping: {
+				domainName: httpApiDomainName
+			}
+		});
+
+		httpApi.addRoutes({
+			path: "/oauth/callback",
+			methods: [apigwv2.HttpMethod.GET],
+			integration: new HttpLambdaIntegration("OauthCallback", oauthCallbackFunction)
 		});
 	}
 }
