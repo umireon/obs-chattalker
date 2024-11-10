@@ -115,7 +115,12 @@ export class MainStack extends cdk.Stack {
 			},
 			certificate: obsCertificate,
 			domainNames: [obsDomainName],
-			defaultRootObject: "index.html"
+			errorResponses: [
+				{
+					httpStatus: 404,
+					responsePagePath: "/404.html"
+				}
+			]
 		});
 
 		new route53.ARecord(this, "ObsZoneAlias", {
