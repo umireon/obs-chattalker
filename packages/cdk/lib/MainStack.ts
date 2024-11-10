@@ -3,11 +3,12 @@ import { Construct } from "constructs";
 
 import {
 	aws_apigatewayv2 as apigwv2,
+	aws_certificatemanager as acm,
 	aws_iam as iam,
 	aws_lambda_nodejs as nodejs,
 	aws_route53 as route53,
 	aws_route53_targets as targets,
-	aws_certificatemanager as acm
+	aws_secretsmanager as secretsmanager
 } from "aws-cdk-lib";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 
@@ -63,9 +64,19 @@ export class MainStack extends cdk.Stack {
 			delegationRole
 		});
 
-		const oauthCallbackFunction = new nodejs.NodejsFunction(this, "OauthCallbackFunction", {
+		const twitchClientSecret = new secretsmanager.Secret(this, "Twitch", {
+			secretObjectValue: {
+				twitchClientId: cdk.SecretValue.unsafePlainText("ijpjboz3v6rbxbalzqvtln0puk2md8"),
+				twitchClientSecret: cdk.SecretValue.unsafePlainText("")
+			}
+		});
+
+		const twitchOauthCallbackFunction = new nodejs.NodejsFunction(this, "TwitchOauthCallbackFunction", {
 			entry: "lib/lambda/entrypoints.ts",
-			handler: "handleOauthCallback"
+			handler: "handleTwitchOauthCallback",
+			environment: {
+				TWITCH_SECRET_ARN: twitchClientSecret.secretArn
+			}
 		});
 
 		const httpApi = new apigwv2.HttpApi(this, "ObsChatTalkerApi", {
@@ -75,9 +86,9 @@ export class MainStack extends cdk.Stack {
 		});
 
 		httpApi.addRoutes({
-			path: "/oauth/callback",
+			path: "/twitch/oauth/callback",
 			methods: [apigwv2.HttpMethod.GET],
-			integration: new HttpLambdaIntegration("OauthCallback", oauthCallbackFunction)
+			integration: new HttpLambdaIntegration("TwitchOauthCallback", twitchOauthCallbackFunction)
 		});
 	}
 }

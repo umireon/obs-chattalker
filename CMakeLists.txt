@@ -49,6 +49,10 @@ if(APPLE)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE AVFoundationSpeechSynthesis)
 endif()
 
+set(unofficial-brotli_DIR ${CMAKE_SOURCE_DIR}/vcpkg_installed/${TRIPLET}/share/unofficial-brotli)
+find_package(httplib CONFIG REQUIRED HINTS ${CMAKE_SOURCE_DIR}/vcpkg_installed/${TRIPLET})
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE httplib::httplib)
+
 target_sources(
   ${CMAKE_PROJECT_NAME}
   PRIVATE src/SpeechSynthesis/SpeechSynthesis.hpp

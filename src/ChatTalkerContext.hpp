@@ -1,5 +1,10 @@
 #pragma once
 
+#include <atomic>
+#include <thread>
+
+#include <httplib.h>
+
 #include <obs.h>
 
 class ChatTalkerContext {
@@ -15,4 +20,11 @@ public:
 
 	bool handleAuthTwitchClicked(obs_properties_t *props,
 				     obs_property_t *property);
+
+private:
+	httplib::Server authCodeReceivingServer;
+	std::thread authCodeReceiverThread;
+	std::thread authCodeReceiverCleanupThread;
+
+	std::atomic_bool isDestroying;
 };
