@@ -113,7 +113,8 @@ export class MainStack extends cdk.Stack {
 				origin: origins.S3BucketOrigin.withOriginAccessControl(obsBucket)
 			},
 			certificate: obsCertificate,
-			domainNames: [obsDomainName]
+			domainNames: [obsDomainName],
+			defaultRootObject: "index.html"
 		});
 
 		new route53.ARecord(this, "ObsZoneAlias", {
