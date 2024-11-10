@@ -11,8 +11,5 @@
 	},
 	"workspaces": [
 		"packages/cdk"
-	],
-	"dependencies": {
-		"@aws-lambda-powertools/parameters": "^2.10.0"
-	}
+	]
 }

@@ -34,7 +34,7 @@ jobs:
         uses: "actions/checkout@v4"
 
       - name: "Install dependencies"
-        run: "npm ci --workspace=obs-chattalker-cdk"
+        run: "npm ci"
 
       - name: "Deploy infra"
         working-directory: "packages/cdk"
