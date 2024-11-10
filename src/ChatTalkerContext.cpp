@@ -20,14 +20,7 @@ ChatTalkerContext::ChatTalkerContext(obs_data_t *settings,
 	update(settings);
 }
 
-ChatTalkerContext::~ChatTalkerContext(void)
-{
-	authCodeReceiverDestroying.store(true);
-	std::this_thread::sleep_for(std::chrono::milliseconds(200));
-	if (authCodeReceiverCleanupThread.joinable()) {
-		authCodeReceiverCleanupThread.join();
-	}
-}
+ChatTalkerContext::~ChatTalkerContext(void) {}
 
 bool handle_auth_twitch_clicked(obs_properties_t *props,
 				obs_property_t *property, void *data)
@@ -51,91 +44,15 @@ obs_properties_t *ChatTalkerContext::getProperties(void)
 	return props;
 }
 
-#define TWITCH_CLIENT_ID "ijpjboz3v6rbxbalzqvtln0puk2md8"
-#define TWITCH_REDIRECT_URI \
-	"https://apidev.obs-chattalker.kaito.tokyo/twitch/oauth/callback"
-#define TWITCH_SCOPE "chat:read"
-#define TWITCH_FINISHED_URI \
-	"https://apidev.obs-chattalker.kaito.tokyo/twitch/oauth/finished"
-
 bool ChatTalkerContext::handleAuthTwitchClicked(obs_properties_t *props,
 						obs_property_t *property)
 {
 	UNUSED_PARAMETER(props);
 	UNUSED_PARAMETER(property);
 
-	if (authCodeReceiverThread.joinable()) {
-		authCodeReceiverDestroying.store(true);
-		std::this_thread::sleep_for(std::chrono::milliseconds(200));
-		authCodeReceiverCleanupThread.join();
-	}
+	int localPort = twitchOauthClient.startTokenReceiver();
+	twitchOauthClient.openAuthorizeScreen(localPort);
 
-	authCodeReceiverCleanupThread = std::thread([this]() {
-		for (long timeout = 6000;
-		     timeout > 0 && !authCodeReceiverDestroying.load();
-		     timeout -= 1) {
-			std::this_thread::sleep_for(
-				std::chrono::milliseconds(100));
-		}
-
-		if (authCodeReceiverServer.is_running()) {
-			authCodeReceiverServer.stop();
-		}
-
-		if (authCodeReceiverThread.joinable()) {
-			authCodeReceiverThread.join();
-		}
-
-		authCodeReceiverDestroying.store(false);
-	});
-
-	int port = 0;
-
-	authCodeReceiverServer.Get("/", [&port](const httplib::Request &req,
-						httplib::Response &res) {
-		std::string accessToken;
-		std::string expiresIn;
-		std::string refreshToken;
-
-		for (auto entry : req.params) {
-			if (entry.first == "access_token") {
-				accessToken = entry.second;
-			} else if (entry.first == "expires_in") {
-				expiresIn = entry.second;
-			} else if (entry.first == "refresh_token") {
-				refreshToken = entry.second;
-			}
-		}
-
-		if (accessToken.empty() || expiresIn.empty() ||
-		    refreshToken.empty()) {
-			res.status = httplib::BadRequest_400;
-			res.set_content(httplib::status_message(res.status),
-					"text/plain");
-			obs_log(LOG_WARNING, "Authorization code is invalid!");
-		} else {
-			obs_log(LOG_WARNING, "Authorization code is received");
-			res.set_redirect(TWITCH_FINISHED_URI);
-		}
-	});
-
-	port = authCodeReceiverServer.bind_to_any_port("localhost");
-	obs_log(LOG_INFO, "port: %d", port);
-
-	authCodeReceiverThread = std::thread(
-		[this]() { authCodeReceiverServer.listen_after_bind(); });
-
-	std::ostringstream urlBuilder;
-	urlBuilder << "https://id.twitch.tv/oauth2/authorize"
-		      "?response_type=code"
-		      "&client_id=" TWITCH_CLIENT_ID
-		      "&redirect_uri=" TWITCH_REDIRECT_URI
-		      "&scope=" TWITCH_SCOPE "&state="
-		   << port;
-
-	QUrl url(urlBuilder.str().c_str());
-
-	QDesktopServices::openUrl(url);
 	return true;
 }
 

@@ -7,6 +7,8 @@
 
 #include <obs.h>
 
+#include "TwitchOauthClient.hpp"
+
 class ChatTalkerContext {
 	const obs_source_t *source;
 
@@ -22,6 +24,8 @@ public:
 				     obs_property_t *property);
 
 private:
+	TwitchOauthClient twitchOauthClient;
+
 	httplib::Server authCodeReceiverServer;
 	std::thread authCodeReceiverThread;
 	std::thread authCodeReceiverCleanupThread;
