@@ -43,11 +43,11 @@ export class MainStack extends cdk.Stack {
 			delegationRoleArn
 		);
 
-		// new route53.CrossAccountZoneDelegationRecord(this, "ApiDevZoneDelegate", {
-		// 	delegatedZone: apiZone,
-		// 	parentHostedZoneName: "obs-chattalker.kaito.tokyo",
-		// 	delegationRole
-		// });
+		new route53.CrossAccountZoneDelegationRecord(this, "ApiDevZoneDelegate", {
+			delegatedZone: apiZone,
+			parentHostedZoneName: "obs-chattalker.kaito.tokyo",
+			delegationRole
+		});
 
 		// API Gateway
 		const apiCertificate = new acm.Certificate(this, "ApiCertificate", {
