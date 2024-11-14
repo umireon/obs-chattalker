@@ -20,6 +20,10 @@ jobs:
     concurrency:
       group: "${{ github.workflow }}-dev"
 
+    permissions:
+      contents: "read"
+      id-token: "write"
+
     steps:
       - name: "Fix npm"
         run: "mkdir -p /tmp/opt/npm/lib"
