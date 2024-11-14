@@ -1,5 +1,5 @@
 ---
-name: "deploy-infra"
+name: "obs-chattalker-deploy"
 
 on:
   push:
