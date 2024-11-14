@@ -11,7 +11,7 @@ defaults:
     shell: "bash"
 
 jobs:
-  DeployInfra:
+  DeployObsChatTalkerInfra:
     runs-on:
       - "codebuild-CDKRunner-${{ github.run_id }}-${{ github.run_attempt }}"
       - "image:arm-lambda-nodejs20"
