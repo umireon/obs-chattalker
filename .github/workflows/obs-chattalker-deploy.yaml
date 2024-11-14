@@ -24,6 +24,12 @@ jobs:
       - name: "Fix npm"
         run: "mkdir -p /tmp/opt/npm/lib"
 
+      - name: "Configure AWS credentials"
+        uses: "aws-actions/configure-aws-credentials@v4"
+        with:
+          aws-region: "us-east-1"
+          role-to-assume: "arn:aws:iam::147997151289:role/ObsChatTalkerMainRole"
+
       - name: "Checkout"
         uses: "actions/checkout@v4"
 
