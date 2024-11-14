@@ -13,15 +13,12 @@ defaults:
 jobs:
   DeployInfra:
     runs-on:
-      - "codebuild-ObsChatTalkerInfraDeployerDev001-${{ github.run_id }}-${{ github.run_attempt }}"
+      - "codebuild-CDKRunner-${{ github.run_id }}-${{ github.run_attempt }}"
       - "image:arm-lambda-nodejs20"
       - "instance-size:1GB"
 
-    environment: "dev"
-
     concurrency:
-      group: "dev"
-      cancel-in-progress: true
+      group: "${{ github.workflow }}-dev"
 
     steps:
       - name: "Fix npm"
