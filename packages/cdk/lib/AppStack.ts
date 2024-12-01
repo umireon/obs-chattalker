@@ -22,6 +22,7 @@ interface AppStackProps extends cdk.StackProps {
 	readonly certificates: CertificatesStack;
 	readonly apiDomainName: string;
 	readonly obsDomainName: string;
+	readonly obsRecordName: string;
 }
 
 export class AppStack extends cdk.Stack {
@@ -91,7 +92,7 @@ export class AppStack extends cdk.Stack {
 
 		new route53.ARecord(this, "ObsZoneAlias", {
 			zone: props.hostedZones.apiZone,
-			recordName: props.obsDomainName,
+			recordName: props.obsRecordName,
 			target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(obsDistribution))
 		});
 

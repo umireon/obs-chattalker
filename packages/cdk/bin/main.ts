@@ -15,9 +15,9 @@ const hostedZones = new HostedZonesStack(app, "HostedZonesStack", {
 		account: workloadAccountIds.obsChatTalkerDev001,
 		region: "us-east-1"
 	},
-	zoneName: "apidev.obs-chattalker.kaito.tokyo.",
+	zoneName: "apidev.obs-chattalker.kaito.tokyo",
 	deletationRoleArn: "arn:aws:iam::913524900670:role/route53-delegation/apidev-586794439382",
-	parentHostedZoneName: "obs-chattalker.kaito.tokyo."
+	parentHostedZoneName: "obs-chattalker.kaito.tokyo"
 });
 
 const certificates = new CertificatesStack(app, "CertificatesStack", {
@@ -26,8 +26,8 @@ const certificates = new CertificatesStack(app, "CertificatesStack", {
 		region: "us-east-1"
 	},
 	hostedZones,
-	apiDomainName: "apidev.obs-chatalker.kaito.tokyo.",
-	obsDomainName: "obs.apidev.obs-chatalker.kaito.tokyo."
+	apiDomainName: "apidev.obs-chatalker.kaito.tokyo",
+	obsDomainName: "obs.apidev.obs-chatalker.kaito.tokyo"
 });
 
 new AppStack(app, "AppStack", {
@@ -37,8 +37,9 @@ new AppStack(app, "AppStack", {
 	},
 	hostedZones,
 	certificates,
-	apiDomainName: "apidev.obs-chatalker.kaito.tokyo.",
-	obsDomainName: "obs.apidev.obs-chatalker.kaito.tokyo."
+	apiDomainName: "apidev.obs-chatalker.kaito.tokyo",
+	obsDomainName: "obs.apidev.obs-chatalker.kaito.tokyo",
+	obsRecordName: "obs"
 });
 
 app.synth();
