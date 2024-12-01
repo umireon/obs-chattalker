@@ -1,7 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 
-import { aws_route53 as route53 } from "aws-cdk-lib";
+import { aws_iam as iam, aws_route53 as route53 } from "aws-cdk-lib";
 
 interface MainStackProps extends cdk.StackProps {
 	readonly zoneName: string;
