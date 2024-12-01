@@ -15,6 +15,7 @@
 !.prettierignore
 !.prettierrc
 !buildspec.json
+!buildspec.yml
 !CMakeLists.txt
 !CMakePresets.json
 !LICENSE
