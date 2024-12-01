@@ -8,4 +8,5 @@ phases:
 
   build:
     commands:
+      - "cd cd $CODEBUILD_SRC_DIR/packages/cdk"
       - "./update.sh"
