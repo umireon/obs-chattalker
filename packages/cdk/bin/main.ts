@@ -26,8 +26,8 @@ const certificates = new CertificatesStack(app, "CertificatesStack", {
 		region: "us-east-1"
 	},
 	hostedZones,
-	apiDomainName: "apidev.obs-chatalker.kaito.tokyo",
-	obsDomainName: "obs.apidev.obs-chatalker.kaito.tokyo"
+	apiDomainName: "apidev.obs-chattalker.kaito.tokyo",
+	obsDomainName: "obs.apidev.obs-chattalker.kaito.tokyo"
 });
 
 new AppStack(app, "AppStack", {
@@ -37,8 +37,8 @@ new AppStack(app, "AppStack", {
 	},
 	hostedZones,
 	certificates,
-	apiDomainName: "apidev.obs-chatalker.kaito.tokyo",
-	obsDomainName: "obs.apidev.obs-chatalker.kaito.tokyo",
+	apiDomainName: "apidev.obs-chattalker.kaito.tokyo",
+	obsDomainName: "obs.apidev.obs-chattalker.kaito.tokyo",
 	obsRecordName: "obs"
 });
 
