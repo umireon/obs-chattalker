@@ -3,10 +3,8 @@ import { Construct } from "constructs";
 
 import {
 	aws_apigatewayv2 as apigwv2,
-	aws_certificatemanager as acm,
 	aws_cloudfront as cloudfront,
 	aws_cloudfront_origins as origins,
-	aws_iam as iam,
 	aws_lambda_nodejs as nodejs,
 	aws_route53 as route53,
 	aws_route53_targets as targets,
@@ -14,54 +12,30 @@ import {
 	aws_s3_deployment as s3deploy,
 	aws_secretsmanager as secretsmanager
 } from "aws-cdk-lib";
-import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 
-interface MainStackProps extends cdk.StackProps {
-	readonly zoneName: string;
+import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
+import { HostedZonesStack } from "./HostedZonesStack.js";
+import { CertificatesStack } from "./CertificatesStack.js";
+
+interface AppStackProps extends cdk.StackProps {
+	readonly hostedZones: HostedZonesStack;
+	readonly certificates: CertificatesStack;
+	readonly apiDomainName: string;
+	readonly obsDomainName: string;
 }
 
-export class MainStack extends cdk.Stack {
-	constructor(scope: Construct, id: string, props: MainStackProps) {
+export class AppStack extends cdk.Stack {
+	constructor(scope: Construct, id: string, props: AppStackProps) {
 		super(scope, id, props);
 
-		// Hosted zone
-		const apiZone = new route53.PublicHostedZone(this, "ApiZone", {
-			zoneName: props.zoneName
-		});
-
-		const delegationRoleArn = this.formatArn({
-			region: "",
-			service: "iam",
-			account: "913524900670",
-			resource: "role",
-			resourceName: `route53-delegation/apidev-${this.account}`
-		});
-
-		const delegationRole = iam.Role.fromRoleArn(
-			this,
-			"ApidevZoneDelegationRole",
-			delegationRoleArn
-		);
-
-		new route53.CrossAccountZoneDelegationRecord(this, "ApiDevZoneDelegate", {
-			delegatedZone: apiZone,
-			parentHostedZoneName: "obs-chattalker.kaito.tokyo",
-			delegationRole
-		});
-
 		// API Gateway
-		const apiCertificate = new acm.Certificate(this, "ApiCertificate", {
-			domainName: props.zoneName,
-			validation: acm.CertificateValidation.fromDns(apiZone)
-		});
-
-		const httpApiDomainName = new apigwv2.DomainName(this, "ApiDoaminName", {
-			domainName: props.zoneName,
-			certificate: apiCertificate
+		const httpApiDomainName = new apigwv2.DomainName(this, "ApiDomainName", {
+			domainName: props.apiDomainName,
+			certificate: props.certificates.apiCertificate
 		});
 
 		new route53.ARecord(this, "ApiZoneAlias", {
-			zone: apiZone,
+			zone: props.hostedZones.apiZone,
 			target: route53.RecordTarget.fromAlias(
 				new targets.ApiGatewayv2DomainProperties(
 					httpApiDomainName.regionalDomainName,
@@ -77,18 +51,11 @@ export class MainStack extends cdk.Stack {
 		});
 
 		// OBS authorization finished screen
-		const obsDomainName = `obs.${props.zoneName}`;
-
 		const obsBucket = new s3.Bucket(this, "ObsBucket");
 
 		new s3deploy.BucketDeployment(this, "ObsBucketDeployment", {
 			sources: [s3deploy.Source.asset("./assets/ObsBucket")],
 			destinationBucket: obsBucket
-		});
-
-		const obsCertificate = new acm.Certificate(this, "ObsCertificate", {
-			domainName: obsDomainName,
-			validation: acm.CertificateValidation.fromDns(apiZone)
 		});
 
 		const recursiveDefaultRootFunction = new cloudfront.Function(
@@ -112,8 +79,8 @@ export class MainStack extends cdk.Stack {
 					}
 				]
 			},
-			certificate: obsCertificate,
-			domainNames: [obsDomainName],
+			certificate: props.certificates.obsCertificate,
+			domainNames: [props.obsDomainName],
 			errorResponses: [
 				{
 					httpStatus: 403,
@@ -123,8 +90,8 @@ export class MainStack extends cdk.Stack {
 		});
 
 		new route53.ARecord(this, "ObsZoneAlias", {
-			zone: apiZone,
-			recordName: "obs",
+			zone: props.hostedZones.apiZone,
+			recordName: props.obsDomainName,
 			target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(obsDistribution))
 		});
 
@@ -144,7 +111,7 @@ export class MainStack extends cdk.Stack {
 				handler: "handleTwitchOauthCallback",
 				environment: {
 					TWITCH_SECRET_NAME: twitchClientSecret.secretName,
-					HOST: props.zoneName
+					HOST: props.apiDomainName
 				}
 			}
 		);
